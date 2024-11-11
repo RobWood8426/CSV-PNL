@@ -1,0 +1,13 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src"]
+
+ :dependencies
+ []
+
+ :builds
+ {:library
+  {:target :npm-module
+   :output-dir "target"
+   :exports {create-pnl CSV-PNL.core/create-pnl}
+   :modules {:main {:entries [CSV-PNL.core]}}}}}
