@@ -5,16 +5,15 @@
  :dep true
 
  :builds
- {:builds
-  {:browser
-   {:target     :browser
-    :output-dir "public/js"
-    :asset-path "/js"
-    :modules    {:main {:entries [CSV-PNL.core]}}
-    :exports {create-pnl CSV-PNL.core/create-pnl}}
-   
-   :node
-   {:target     :npm-module
-    :output-to  "dist/main.js"
-    :main       your-namespace.core
-    :exports {create-pnl CSV-PNL.core/create-pnl}}}}}
+ {:browser
+  {:target     :browser
+   :output-dir "public/js"
+   :asset-path "/js"
+   :modules    {:main {:entries [CSV-PNL.core]}}
+   :exports {create-pnl CSV-PNL.core/create-pnl}}
+  
+  :node
+  {:target     :npm-module
+   :output-to  "dist/main.js"
+   :main       your-namespace.core
+   :exports {create-pnl CSV-PNL.core/create-pnl}}}}
