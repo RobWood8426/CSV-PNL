@@ -15,5 +15,5 @@
   :node
   {:target     :npm-module
    :output-to  "dist/main.js"
-   :main       your-namespace.core
+   :main       CSV-PNL.core
    :exports {create-pnl CSV-PNL.core/create-pnl}}}}
