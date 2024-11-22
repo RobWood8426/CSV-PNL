@@ -1,12 +1,14 @@
 (ns CSV-PNL.core
   (:require
-   [cljs.nodejs :as nodejs] 
+   [CSV-PNL.io :as io]
    [clojure.string :as string]))
 
 (println "Starting Point")
 
-(defn ^export create-pnl [csv] 
-  (println "CSV Uploaded"))
+(defn ^export create-pnl [csv]
+  (let [content (io/read-file csv)]
+    ;; Process content
+    ))
 
 
 (defn parse-line [line]
@@ -22,14 +24,9 @@
 (def fs (nodejs/require "fs"))
 
 (defn node-slurp [file-path]
-  (let [content (.toString (.readFileSync fs file-path))]
-    content
-    ))
-
-
+  (let [content (.toString ^js (.readFileSync ^js fs file-path))]
+    content))
 
 (comment
   (parse-csv
-   (node-slurp "resources/transaction_data.csv"))
-  
-  )
+   (node-slurp "resources/transaction_data.csv")))
