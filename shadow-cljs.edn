@@ -1,19 +1,16 @@
 ;; shadow-cljs configuration
-{:source-paths
- ["src"]
-
- :dep true
+{:deps true
 
  :builds
  {:browser
   {:target     :browser
-   :output-dir "public/js"
-   :asset-path "/js"
+   :output-dir "dist/browser"
+   :asset-path "/browser"
    :modules    {:main {:entries [CSV-PNL.core]}}
    :exports {create-pnl CSV-PNL.core/create-pnl}}
   
   :node
-  {:target     :npm-module
-   :output-to  "dist/main.js"
+  {:target     :node-library
+   :output-to  "dist/node/main.js"
    :main       CSV-PNL.core
-   :exports {create-pnl CSV-PNL.core/create-pnl}}}}
+   :exports {:create-pnl CSV-PNL.core/create-pnl}}}}
