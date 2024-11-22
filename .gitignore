@@ -11,3 +11,4 @@ node_modules/
 .shadow-cljs/
 public/
 .portal/
+dist/
