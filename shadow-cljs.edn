@@ -13,4 +13,17 @@
   {:target     :node-library
    :output-to  "dist/node/main.js"
    :main       CSV-PNL.core
-   :exports {:create-pnl CSV-PNL.core/create-pnl}}}}
+   :exports {:create-pnl CSV-PNL.core/create-pnl}}
+  
+  :node-tests
+  {:target :node-test
+   :output-to "target/node-tests.js"
+   :autorun true}
+  
+  :browser-tests
+  {:target :browser-test
+   :test-dir "target/browser-test"
+   :devtools {:http-port 8021
+              :http-root "target/browser-test"}}
+  
+  }}
