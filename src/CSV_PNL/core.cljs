@@ -5,12 +5,6 @@
 
 (println "Starting Point")
 
-(defn ^export create-pnl [csv]
-  (let [content (io/read-file csv)]
-    ;; Process content
-    ))
-
-
 (defn parse-line [line]
   (string/split line #","))
 
@@ -20,13 +14,25 @@
         rows (map parse-line (rest lines))]
     (map #(zipmap headers %) rows)))
 
+(defn calculate-totals [transactions]
+  (reduce (fn [acc {:keys [amount type]}]
+            (let [amount-num (js/parseFloat amount)]
+              (case type
+                "income" (update acc :income + amount-num)
+                "expense" (update acc :expense + amount-num)
+                acc)))
+          {:income 0 :expense 0}
+          transactions))
 
-(def fs (nodejs/require "fs"))
+(defn ^export create-pnl [csv]
+  (let [content (io/read-file csv)
+        transactions (parse-csv content)
+        totals (calculate-totals transactions)]
+    (assoc totals 
+           :net-profit (- (:income totals) 
+                         (:expense totals))
+           :transactions transactions)))
 
-(defn node-slurp [file-path]
-  (let [content (.toString ^js (.readFileSync ^js fs file-path))]
-    content))
 
-(comment
-  (parse-csv
-   (node-slurp "resources/transaction_data.csv")))
+
+
