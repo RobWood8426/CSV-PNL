@@ -28,7 +28,12 @@
                 const updateResult = (result) => {
                     resultDiv.innerHTML = JSON.stringify(result, null, 2);
                 };
-                await CSV_PNL.core.createpnl(file, updateResult);
+                const opts = {
+                    'title-mapping': {
+                        'SomeCrazyDescription': 'Description'
+                    }
+                };
+                await CSV_PNL.core.createpnl(file, updateResult, opts);
             } catch (error) {
                 resultDiv.innerHTML = `Error: ${error.message}`;
             }

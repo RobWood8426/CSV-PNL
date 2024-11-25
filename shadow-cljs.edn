@@ -14,7 +14,7 @@
   {:target     :node-library
    :output-to  "dist/node/main.js"
    :main       CSV-PNL.core
-   :exports {:create-pnl CSV-PNL.core/create-pnl}
+   :exports {:create-pnl CSV-PNL.core/createpnl}
    :compiler-options {:reader-features #{:node}}}
   
   :node-tests
