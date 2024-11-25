@@ -3,7 +3,7 @@
    [clojure.core.async :refer [<! go]]
    [clojure.string :as string]))
 
-(def column-config
+(def default-column-config
   {:amount
    {:key :Amount
     :required? true
@@ -33,14 +33,18 @@
 (defn parse-line [line]
   (string/split line #","))
 
-(defn validate-headers [title-mapping headers]
-  (let [required-columns
+(defn validate-headers [{:keys [title-mapping column-config]} headers]
+  (let [merged-config (merge default-column-config column-config)
+    
+        required-columns
         (set
          (map
           (comp name :key)
-          (filter :required? (vals column-config))))
+          (filter
+           :required?
+           (vals merged-config))))
 
-        all-headers (set (map (comp name :key) (vals column-config)))
+        all-headers (set (map (comp name :key) (vals merged-config)))
         mapped-headers (map #(get title-mapping (keyword %) %) headers)
         actual-headers (set mapped-headers)]
     {:valid? (every? actual-headers required-columns)
@@ -60,7 +64,7 @@
     (catch :default e
       (throw (js/Error. (str "Error processing column " (name key) ": " (.-message e)))))))
 
-(defn process-row [headers row]
+(defn process-row [{:keys [column-config]} headers row]
   (let [mapped (zipmap headers row)]
     (reduce-kv
      (fn [acc config-key config]
@@ -68,13 +72,15 @@
          (assoc acc config-key (transform-value config value))
          acc))
      {}
-     column-config)))
+     (merge
+      default-column-config
+      column-config))))
 
-(defn process-rows [headers rows]
+(defn process-rows [opts headers rows]
   (->>
    rows
    (map second)
-   (map (partial process-row headers))))
+   (map (partial opts process-row headers))))
 
 (comment
 
@@ -88,15 +94,15 @@
 (defn parse-csv
   ([csv-string]
    (parse-csv csv-string {}))
-  ([csv-string {:keys [title-mapping column-config]}]
+  ([csv-string {:keys [column-config] :as opts}]
    (let [lines (string/split-lines csv-string)
          first-line (parse-line (first lines))
-         {:keys [valid? missing has-headers? mapped-headers]} (validate-headers title-mapping first-line)]
+         {:keys [valid? missing has-headers? mapped-headers]} (validate-headers opts first-line)]
 
      (cond
        (not has-headers?)
        {:error "CSV appears to be missing a header row (Or hasn't mapped headers correctly)"
-        :expected-headers (map (comp name :key) (vals column-config))}
+        :expected-headers (map (comp name :key) (vals (merge default-column-config column-config)))}
 
        (not valid?)
        {:error (str "Required columns are missing: " (string/join ", " missing))
@@ -125,7 +131,7 @@
 
            :else
            {:success true
-            :data (process-rows headers rows)}))))))
+            :data (process-rows opts headers rows)}))))))
 
 (defn calculate-totals [csv-result]
   (if (:success csv-result)
