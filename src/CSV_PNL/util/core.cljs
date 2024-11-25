@@ -1,8 +1,7 @@
 (ns CSV-PNL.util.core
   (:require
    [clojure.core.async :refer [<! go]]
-   [clojure.string :as string]
-   [CSV-PNL.io :as io]))
+   [clojure.string :as string]))
 
 (def column-config
   {:amount
