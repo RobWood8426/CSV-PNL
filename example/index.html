@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../dist/browser/main.js"></script>
+    <title>CSV File Upload</title>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV File Upload</h1>
+        
+        <div class="upload-section">
+            <input type="file" id="csvFile" accept=".csv" />
+            <button onclick="handleFileUpload()">Upload CSV</button>
+        </div>
+        <div id="result">
+        </div>
+    </div>
+    <script>
+    function handleFileUpload() {
+        const fileInput = document.getElementById('csvFile');
+        const file = fileInput.files[0];
+        if (file) {
+            CSV_PNL.core.createpnl(file);
+        } else {
+            alert('Please select a file first');
+        }
+    }
+    </script>
+</body>
+</html>

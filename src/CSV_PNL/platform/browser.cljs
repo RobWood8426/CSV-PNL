@@ -1,28 +1,20 @@
 (ns CSV-PNL.platform.browser
-  (:require [cljs.core.async :refer [chan put! close!]]
-            [cljs.core.async.interop :refer-macros [<p!]]
-            [clojure.core.async :refer-macros [go]]))
+  (:require [cljs.core.async.interop :refer-macros [<p!]])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(defn browser-slurp [file]
-  (let [out (chan)]
-    (go
-      (try
-        (let [reader (js/FileReader.)
-              promise
-              (js/Promise.
-               (fn [resolve reject]
-                 (set!
-                  (.-onload reader)
-                  (fn [e]
-                    (resolve (.. e -target -result))))
-                 (set!
-                  (.-onerror reader)
-                  (fn [e]
-                    (reject (.. e -target -error))))
-                 (.. reader (readAsText file))))]
-          (put! out (<p! promise))
-          (close! out))
-        (catch js/Error e
-          (put! out e)
-          (close! out))))
-    out))
+(defn slurp [file]
+  (go
+    (let [result
+          (<p!
+           (js/Promise.
+            (fn [resolve reject]
+              (let [reader (js/FileReader.)]
+                (.addEventListener reader "load" #(resolve (.. % -target -result)))
+                (.addEventListener reader "error" #(reject (.. % -target -error)))
+                (.readAsText reader file)))))]
+      result)))
+
+(comment
+  (go
+    (let [result (<p! (slurp "resources/transaction_data.csv"))]
+      (println result))))

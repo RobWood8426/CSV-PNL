@@ -12,3 +12,4 @@ node_modules/
 public/
 .portal/
 dist/
+.DS_Store
