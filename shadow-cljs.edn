@@ -6,14 +6,16 @@
   {:target     :browser
    :output-dir "dist/browser"
    :asset-path "/browser"
-   :modules    {:main {:entries [CSV-PNL.core]}}
-   :exports {create-pnl CSV-PNL.core/create-pnl}}
+   :modules {:main {:entries [CSV-PNL.core]}}
+   :compiler-options {:reader-features #{:browser}}
+   }
   
   :node
   {:target     :node-library
    :output-to  "dist/node/main.js"
    :main       CSV-PNL.core
-   :exports {:create-pnl CSV-PNL.core/create-pnl}}
+   :exports {:create-pnl CSV-PNL.core/create-pnl}
+   :compiler-options {:reader-features #{:node}}}
   
   :node-tests
   {:target :node-test
