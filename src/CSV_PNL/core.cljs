@@ -23,7 +23,7 @@
       (callback
        (clj->js totals)))))
 
-(defn ^:export parsecsv 
+(defn ^:export parsecsv
   "Parses a CSV string into a sequence of transaction records.
    
    Parameters:
@@ -37,6 +37,22 @@
   (clj->js
    (util/parse-csv content opts)))
 
+
+(defn ^:export calctotals
+  "Calculates profit and loss totals from a sequence of transaction records.
+   
+   Parameters:
+   - content: A sequence of transaction maps, where each map represents a transaction
+             with standardized keys (must match format produced by parsecsv)
+   
+   Returns a JavaScript object containing calculated totals, including:
+   - income: Total income amount
+   - expenses: Total expenses amount
+   - net: Net profit/loss (income - expenses)"
+  [content]
+  (println (js->clj content))
+  (clj->js
+   (util/calculate-totals (js->clj content {:keywordize-keys true}))))
 
 
 

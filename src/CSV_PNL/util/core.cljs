@@ -174,7 +174,8 @@
        {}))))
 
   ;; Valid CSV
-  (parse-csv "Amount,Date,Type,Description\n100,2024-03-20,income,Salary" {})
+  (calculate-totals
+   (parse-csv "Amount,Date,Type,Description\n100,2024-03-20,income,Salary" {}))
 
 ;; Missing headers
   (parse-csv "100,2024-03-20,income,Salary" {})
