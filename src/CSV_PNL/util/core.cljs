@@ -35,7 +35,7 @@
 
 (defn validate-headers [{:keys [title-mapping column-config]} headers]
   (let [merged-config (merge default-column-config column-config)
-    
+
         required-columns
         (set
          (map
@@ -53,7 +53,10 @@
      :mapped-headers mapped-headers}))
 
 (comment
-  (validate-headers {:SomeCrazyDescription "Description"} ["Amount" "Date" "SomeCrazyDescription" "Type" "Category"])
+  (validate-headers 
+   {:title-mapping {:SomeCrazyDescription "Description"}} 
+   ["Amount" "Date" "SomeCrazyDescription" "Type" "Category"])
+  
   (validate-headers {} ["Amount" "Date" "Description" "Type" "Category"]))
 
 (defn transform-value [{:keys [key transform]} value]
@@ -80,7 +83,7 @@
   (->>
    rows
    (map second)
-   (map (partial opts process-row headers))))
+   (map (partial process-row opts headers))))
 
 (comment
 
@@ -94,7 +97,7 @@
 (defn parse-csv
   ([csv-string]
    (parse-csv csv-string {}))
-  ([csv-string {:keys [column-config] :as opts}]
+  ([csv-string {:keys [column-config] :as opts}] 
    (let [lines (string/split-lines csv-string)
          first-line (parse-line (first lines))
          {:keys [valid? missing has-headers? mapped-headers]} (validate-headers opts first-line)]
