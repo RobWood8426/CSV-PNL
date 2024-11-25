@@ -7,8 +7,7 @@
    :output-dir "dist/browser"
    :asset-path "/browser"
    :modules {:main {:entries [CSV-PNL.core]}}
-   :compiler-options {:reader-features #{:browser}}
-   }
+   :compiler-options {:reader-features #{:browser}}}
   
   :node
   {:target     :node-library
