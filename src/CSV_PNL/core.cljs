@@ -7,7 +7,7 @@
 (defn ^:export createpnl [csv callback {:keys [title-mapping column-config] :as opts}]
   (go
     (let [{:keys [content]} (<! (io/read-file csv))
-          transactions (util/parse-csv content opts)
+          transactions (util/parse-csv content (js->clj opts {:keywordize-keys true}))
           totals (util/calculate-totals transactions)]
       (callback
        (clj->js totals)))))

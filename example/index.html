@@ -12,13 +12,14 @@
         
         <div class="upload-section">
             <input type="file" id="csvFile" accept=".csv" />
-            <button onclick="handleFileUpload()">Upload CSV</button>
+            <button onclick="handleFileUploadBasic()">Upload Basic CSV</button>
+            <button onclick="handleFileUploadRemapped()">Upload Remapped CSV</button>
         </div>
         <div id="result">
         </div>
     </div>
     <script>
-    async function handleFileUpload() {
+    async function handleFileUploadBasic() {
         const fileInput = document.getElementById('csvFile');
         const resultDiv = document.getElementById('result');
         const file = fileInput.files[0];
@@ -28,12 +29,7 @@
                 const updateResult = (result) => {
                     resultDiv.innerHTML = JSON.stringify(result, null, 2);
                 };
-                const opts = {
-                    'title-mapping': {
-                        'SomeCrazyDescription': 'Description'
-                    }
-                };
-                await CSV_PNL.core.createpnl(file, updateResult, opts);
+                await CSV_PNL.core.createpnl(file, updateResult);
             } catch (error) {
                 resultDiv.innerHTML = `Error: ${error.message}`;
             }
@@ -41,6 +37,29 @@
             alert('Please select a file first');
         }
     }
+    async function handleFileUploadRemapped() {
+            const fileInput = document.getElementById('csvFile');
+            const resultDiv = document.getElementById('result');
+            const file = fileInput.files[0];
+
+            if (file) {
+                try {
+                    const updateResult = (result) => {
+                        resultDiv.innerHTML = JSON.stringify(result, null, 2);
+                    };
+                    const opts = {
+                        'title-mapping': {
+                            'SomeCrazyDescription': 'Description'
+                        }
+                    };
+                    await CSV_PNL.core.createpnl(file, updateResult, opts);
+                } catch (error) {
+                    resultDiv.innerHTML = `Error: ${error.message}`;
+                }
+            } else {
+                alert('Please select a file first');
+            }
+        }
     </script>
 </body>
 </html>

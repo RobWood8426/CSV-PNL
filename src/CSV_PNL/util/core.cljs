@@ -71,7 +71,7 @@
      {}
      column-config)))
 
-(defn process-rows [headers rows] 
+(defn process-rows [headers rows]
   (->>
    rows
    (map second)
