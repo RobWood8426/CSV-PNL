@@ -89,7 +89,7 @@
 (defn parse-csv
   ([csv-string]
    (parse-csv csv-string {}))
-  ([csv-string {:keys [title-mapping]}]
+  ([csv-string {:keys [title-mapping column-config]}]
    (let [lines (string/split-lines csv-string)
          first-line (parse-line (first lines))
          {:keys [valid? missing has-headers? mapped-headers]} (validate-headers title-mapping first-line)]

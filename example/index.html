@@ -14,6 +14,7 @@
             <input type="file" id="csvFile" accept=".csv" />
             <button onclick="handleFileUploadBasic()">Upload Basic CSV</button>
             <button onclick="handleFileUploadRemapped()">Upload Remapped CSV</button>
+            <button onclick="handleDemoCSV()">Parse Demo CSV</button>
         </div>
         <div id="result">
         </div>
@@ -60,6 +61,17 @@
                 alert('Please select a file first');
             }
         }
+    async function handleDemoCSV() {
+        const resultDiv = document.getElementById('result');
+        const csvString = "Amount,Date,Type,Description\n100,2024-03-20,income,Salary";
+        
+        try {
+            const result = CSV_PNL.core.parsecsv(csvString);
+            resultDiv.innerHTML = JSON.stringify(result, null, 2);
+        } catch (error) {
+            resultDiv.innerHTML = `Error: ${error.message}`;
+        }
+    }
     </script>
 </body>
 </html>
