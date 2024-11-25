@@ -15,6 +15,7 @@
             <button onclick="handleFileUploadBasic()">Upload Basic CSV</button>
             <button onclick="handleFileUploadRemapped()">Upload Remapped CSV</button>
             <button onclick="handleDemoCSV()">Parse Demo CSV</button>
+            <button onclick="handleDemoCalc()">Calculate Totals</button>
         </div>
         <div id="result" style="white-space: pre-wrap; font-family: monospace;"></div>
     </div>
@@ -115,6 +116,18 @@
         
         try {
             const result = CSV_PNL.core.parsecsv(csvString);
+            resultDiv.textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+            resultDiv.textContent = `Error: ${error.message}`;
+        }
+    }
+    async function handleDemoCalc() {
+        const resultDiv = document.getElementById('result');
+        const csvString = "Amount,Date,Type,Description\n100,2024-03-20,income,Salary";
+
+        try {
+            const data = CSV_PNL.core.parsecsv(csvString);
+            const result = CSV_PNL.core.calctotals(data);
             resultDiv.textContent = JSON.stringify(result, null, 2);
         } catch (error) {
             resultDiv.textContent = `Error: ${error.message}`;
