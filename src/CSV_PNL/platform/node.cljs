@@ -5,19 +5,43 @@
 
 (def fs (nodejs/require "fs"))
 
-(defn slurp [file-path]
+(defn slurp [input]
   (let [c (chan)]
-    (.readFile
-     ^js fs file-path
-     (fn [err data]
-       (if err
-         (put! c {:error err})
-         (put! c {:content (.toString ^js data)}))))
+    (cond
+      ; Case 1: input is a string path to a file
+      (and (string? input) (.existsSync fs input))
+      (.readFile
+       ^js fs input
+       (fn [err data]
+         (if err
+           (put! c {:error err})
+           (put! c {:content (.toString ^js data)}))))
+      
+      ; Case 2: input is a file-like object with path
+      (and (object? input) (or (.-path input) (.-filename input)))
+      (.readFile
+       ^js fs (or (.-path input) (.-filename input))
+       (fn [err data]
+         (if err
+           (put! c {:error err})
+           (put! c {:content (.toString ^js data)}))))
+      
+      ; Case 3: input is already a string content
+      (string? input)
+      (put! c {:content input})
+      
+      ; Default: invalid input
+      :else
+      (put! c {:error (js/Error. "Invalid input: must be a file path, File object, or string content")}))
     c))
 
+(comment
+  ; With file path
+  (go (println (<! (slurp "resources/transaction_data.csv"))))
 
-(comment 
-  (go
-    (let [result (<! (slurp "resources/transaction_data.csv"))] 
-      (println result)))
+  ; With raw string
+  (go (println (<! (slurp "col1,col2\n1,2"))))
+
+  ; With Node.js file object (e.g., from express-fileupload or similar)
+  (go (println (<! (slurp #js{:filename "resources/transaction_data.csv"}))))
   )

@@ -1,5 +1,6 @@
 (ns CSV-PNL.util.core
-  (:require 
+  (:require
+   [clojure.core.async :refer [<! go]]
    [clojure.string :as string]
    [CSV-PNL.io :as io]))
 
@@ -9,7 +10,7 @@
     :transform js/Number}
    :date
    {:key :Date
-    :transform 
+    :transform
     (fn [date-str]
       (let [date (js/Date. date-str)]
         (if (js/isNaN (. date getTime))
@@ -34,7 +35,9 @@
 
 (defn transform-value [{:keys [key transform]} value]
   (try
-    (transform value)
+    (if (= key :Amount)
+      (-> value transform (.toFixed 2) js/Number)
+      (transform value))
     (catch :default e
       (throw (js/Error. (str "Error processing column " (name key) ": " (.-message e)))))))
 
@@ -62,11 +65,11 @@
       (not has-headers?)
       {:error "CSV appears to be missing a header row (Or hasn't mapped headers correctly)"
        :expected-headers (map (comp name :key) (vals column-config))}
-      
+
       (not valid?)
-      {:error "Required columns are missing"
+      {:error (str "Required columns are missing: " (string/join ", " missing))
        :missing missing}
-      
+
       :else
       (let [header-mapping
             (reduce-kv
@@ -82,7 +85,7 @@
              (fn [[_idx row]]
                (not= (count row) expected-column-count))
              rows)]
-        (cond 
+        (cond
           (seq invalid-rows)
           {:error "Some rows have incorrect number of columns"
            :invalid-rows
@@ -93,26 +96,35 @@
                :got (count row)
                :row row})
             invalid-rows)}
-          
+
           :else
           {:success true
            :data (process-rows headers rows)})))))
 
-(defn calculate-totals [transactions]
-  (reduce
-   (fn [acc {:keys [amount type]}]
-     (let [amount-num (js/parseFloat amount)]
-       (case type
-         "income" (update acc :income + amount-num)
-         "expense" (update acc :expense + amount-num)
-         acc)))
-   {:income 0 :expense 0}
-   transactions)) 
+(defn calculate-totals [csv-result]
+  (if (:success csv-result)
+    (let [{:keys [income expense]} 
+          (reduce
+           (fn [acc {:keys [amount type]}]
+             (case type
+               "Income" (update acc :income + amount)
+               "Expense" (update acc :expense + amount)
+               acc))
+           {:income 0 :expense 0}
+           (:data csv-result))]
+      {:income (-> income (.toFixed 2) js/Number)
+       :expense (-> expense (.toFixed 2) js/Number)})
+    {:error (:error csv-result)}))
 
 (comment
 
-  (parse-csv
-   (io/read-file "resources/transaction_data.csv"))
+
+  (go
+    (let [file (<! (io/read-file "resources/transaction_data.csv"))]
+      (println file)))
+
+
+
 
   (calculate-totals
    (parse-csv
@@ -127,8 +139,5 @@
 ;; Missing required columns
   (parse-csv "Amount,Date,Description\n100,2024-03-20,Salary")
 
-  
-  (parse-csv "Amount,Date,Type,Description\n100,2024-03-20,income,Salary\n101")
 
-
-  )
+  (parse-csv "Amount,Date,Type,Description\n100,2024-03-20,income,Salary\n101"))

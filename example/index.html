@@ -18,11 +18,20 @@
         </div>
     </div>
     <script>
-    function handleFileUpload() {
+    async function handleFileUpload() {
         const fileInput = document.getElementById('csvFile');
+        const resultDiv = document.getElementById('result');
         const file = fileInput.files[0];
+        
         if (file) {
-            CSV_PNL.core.createpnl(file);
+            try {
+                const updateResult = (result) => {
+                    resultDiv.innerHTML = JSON.stringify(result, null, 2);
+                };
+                await CSV_PNL.core.createpnl(file, updateResult);
+            } catch (error) {
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
         } else {
             alert('Please select a file first');
         }
