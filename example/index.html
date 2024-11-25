@@ -16,10 +16,59 @@
             <button onclick="handleFileUploadRemapped()">Upload Remapped CSV</button>
             <button onclick="handleDemoCSV()">Parse Demo CSV</button>
         </div>
-        <div id="result">
-        </div>
+        <div id="result" style="white-space: pre-wrap; font-family: monospace;"></div>
     </div>
     <script>
+        function formatJSON(data) {
+            const period = {
+                start: new Date(Math.min(...Object.values(data.categories)
+                    .flatMap(cat => cat.transactions)
+                    .map(t => new Date(t.date)))),
+                end: new Date(Math.max(...Object.values(data.categories)
+                    .flatMap(cat => cat.transactions)
+                    .map(t => new Date(t.date))))
+            };
+
+            let output = `PROFIT & LOSS STATEMENT\n`;
+            output += `Period: ${period.start.toLocaleDateString()} to ${period.end.toLocaleDateString()}\n\n`;
+            
+            // Income Section
+            output += `INCOME\n`;
+            output += `${'-'.repeat(30)}\n`;
+            for (const [category, details] of Object.entries(data.categories)) {
+                if (details.income > 0) {
+                    output += `${category.padEnd(20)} R${details.income.toFixed(2)}\n`;
+                }
+            }
+            output += `${'-'.repeat(30)}\n`;
+            output += `Total Income:${' '.repeat(8)} R${data.income.toFixed(2)}\n\n`;
+            
+            // Expenses Section
+            output += `EXPENSES\n`;
+            output += `${'-'.repeat(30)}\n`;
+            for (const [category, details] of Object.entries(data.categories)) {
+                if (details.expense < 0) {
+                    output += `${category.padEnd(20)} R${Math.abs(details.expense).toFixed(2)}\n`;
+                }
+            }
+            output += `${'-'.repeat(30)}\n`;
+            output += `Total Expenses:${' '.repeat(6)} R${Math.abs(data.expense).toFixed(2)}\n\n`;
+            
+            // Net Profit/Loss
+            output += `${'-'.repeat(30)}\n`;
+            const netProfit = data.income + data.expense;
+            output += `NET ${netProfit >= 0 ? 'PROFIT' : 'LOSS'}:${' '.repeat(9)} R${netProfit.toFixed(2)}\n`;
+            
+            return output;
+        }
+
+        // Update the updateResult function in all handlers
+        const updateResult = (result) => {
+            const resultDiv = document.getElementById('result');
+            console.log(result);
+            resultDiv.textContent = formatJSON(result);
+        };
+
     async function handleFileUploadBasic() {
         const fileInput = document.getElementById('csvFile');
         const resultDiv = document.getElementById('result');
@@ -27,12 +76,9 @@
         
         if (file) {
             try {
-                const updateResult = (result) => {
-                    resultDiv.innerHTML = JSON.stringify(result, null, 2);
-                };
                 await CSV_PNL.core.createpnl(file, updateResult);
             } catch (error) {
-                resultDiv.innerHTML = `Error: ${error.message}`;
+                resultDiv.textContent = `Error: ${error.message}`;
             }
         } else {
             alert('Please select a file first');
@@ -45,9 +91,6 @@
 
             if (file) {
                 try {
-                    const updateResult = (result) => {
-                        resultDiv.innerHTML = JSON.stringify(result, null, 2);
-                    };
                     const opts = {
                         'title-mapping': {
                             'SomeCrazyDescription': 'Description'
@@ -55,7 +98,7 @@
                     };
                     await CSV_PNL.core.createpnl(file, updateResult, opts);
                 } catch (error) {
-                    resultDiv.innerHTML = `Error: ${error.message}`;
+                    resultDiv.textContent = `Error: ${error.message}`;
                 }
             } else {
                 alert('Please select a file first');
@@ -67,9 +110,9 @@
         
         try {
             const result = CSV_PNL.core.parsecsv(csvString);
-            resultDiv.innerHTML = JSON.stringify(result, null, 2);
+            resultDiv.textContent = JSON.stringify(result, null, 2);
         } catch (error) {
-            resultDiv.innerHTML = `Error: ${error.message}`;
+            resultDiv.textContent = `Error: ${error.message}`;
         }
     }
     </script>

@@ -130,25 +130,49 @@
 
 (defn calculate-totals [csv-result]
   (if (:success csv-result)
-    (let [{:keys [income expense]}
+    (let [{:keys [income expense categories]}
           (reduce
-           (fn [acc {:keys [amount type]}]
-             (case type
-               "Income" (update acc :income + amount)
-               "Expense" (update acc :expense + amount)
-               acc))
-           {:income 0 :expense 0}
+           (fn [acc {:keys [amount type category] :as transaction}]
+             (let [cat (or category "Uncategorized")
+                   updated-cat
+                   (update-in
+                    acc [:categories cat]
+                    (fnil
+                     (fn [cat-data]
+                       (-> cat-data
+                           (update (keyword (string/lower-case type)) + amount)
+                           (update :transactions conj transaction)))
+                     {:income 0 :expense 0 :transactions []}))]
+               (case type
+                 "Income" (update updated-cat :income + amount)
+                 "Expense" (update updated-cat :expense + amount)
+                 updated-cat)))
+           {:income 0 :expense 0 :categories {}}
            (:data csv-result))]
       {:income (-> income (.toFixed 2) js/Number)
-       :expense (-> expense (.toFixed 2) js/Number)})
+       :expense (-> expense (.toFixed 2) js/Number)
+       :categories
+       (update-vals
+        categories
+        #(update-vals
+          %
+          (fn [v]
+            (if (number? v)
+              (-> v (.toFixed 2) js/Number)
+              v))))})
     {:error (:error csv-result)}))
 
 (comment
 
-  (calculate-totals
-   (parse-csv
-    (io/read-file "resources/transaction_data.csv")
-    {}))
+  (go (println (<! (CSV-PNL.platform.node/slurp "resources/transaction_data.csv"))))
+
+  (go
+    (println
+     (calculate-totals
+      (parse-csv
+       (:content
+        (<! (CSV-PNL.platform.node/slurp "resources/transaction_data.csv")))
+       {}))))
 
   ;; Valid CSV
   (parse-csv "Amount,Date,Type,Description\n100,2024-03-20,income,Salary" {})
