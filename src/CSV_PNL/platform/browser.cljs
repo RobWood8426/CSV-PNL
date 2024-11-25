@@ -23,17 +23,13 @@
   (let [c (chan)]
     (cond
       (file-like? input)
-      (async/pipe (read-file-async input) c)
-      
-      (string? input)
-      (put! c {:content input})
+      (async/pipe (read-file-async input) c) 
       
       :else
-      (put! c {:error (js/Error. "Invalid input: must be a File object or string content")}))
+      (put! c {:error (js/Error. "Invalid input: must be a File or Blob object")}))
     c))
 
 (comment
-  ;; Example usage
-  (go (println (<! (slurp "col1,col2\n1,2"))))
+  ;; Example usage 
   (go (println (<! (slurp (js/File. #js["some,csv\ndata"] "test.csv")))))
   (go (println (<! (slurp (js/Blob. #js["some,csv\ndata"] #js{:type "text/csv"}))))))
